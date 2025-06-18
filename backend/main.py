@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
+from flask_restful import Resource, Api, fields, marshal_with, abort
 from flask_cors import CORS
 from flask import request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
@@ -73,7 +73,11 @@ class Users(Resource):
         users = UserModel.query.all()
         return users 
     @marshal_with(userFields)
+    @jwt_required()
     def post(self):
+        current_user = get_jwt_identity()
+        if not current_user:
+            return "Must be registered to use this application"
         data = request.get_json()
         user = UserModel(input=data["input"], result="")
         db.session.add(user)
