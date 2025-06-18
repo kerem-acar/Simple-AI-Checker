@@ -1,34 +1,71 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
 from flask_cors import CORS
 from flask import request
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import get_result
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config["JWT_SECRET_KEY"] = 'your-key-here'
 db = SQLAlchemy(app)
 api = Api(app)
+jwt = JWTManager(app)
 
 class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)
     input = db.Column(db.String(1000), nullable=False)
     result = db.Column(db.String(1000), nullable=False)
+
     
 
     def __repr__(self):
-        return f"User(id = {self.id}, input = {self.input}, result = {self.result})"
+        return f"User(id = {self.id}, username = {self.username}, password = {self.password} input = {self.input}, result = {self.result})"
     
-user_args = reqparse.RequestParser()
-user_args.add_argument('input', type=str, required=True, help='Input cannot be blank')
-
-
 userFields = {
     'id':fields.Integer,
+    'username':fields.String,
+    'password':fields.String,
     'input':fields.String,
     'result':fields.String
 }
+
+class UserRegistration(Resource):
+    @marshal_with(userFields)
+    def post(self):
+        data = request.get_json()
+        
+        if UserModel.query.filter_by(username=data['username']).first():
+            return {"message": "Username taken"}, 400
+        
+        new_user = UserModel(username=data['username'], password=data['password'])
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        return new_user, 201
+
+class UserLogin(Resource):
+    @marshal_with(userFields)
+    def post(self):
+        data = request.get_json()
+
+        user = UserModel.query.filter_by(username=data['username']).first()
+
+        if not user:
+            return {"message": "Username not found"}, 401
+        
+        if user.password != data['password']:
+            return {"message": "Incorrect password"}, 401
+        
+        access_token = create_access_token(identity=user.username)
+        
+        return jsonify(access_token=access_token)
+
 
 class Users(Resource):
     @marshal_with(userFields)
@@ -37,8 +74,8 @@ class Users(Resource):
         return users 
     @marshal_with(userFields)
     def post(self):
-        args = user_args.parse_args()
-        user = UserModel(input=args["input"], result="")
+        data = request.get_json()
+        user = UserModel(input=data["input"], result="")
         db.session.add(user)
         db.session.commit()
         return user, 201
@@ -84,6 +121,8 @@ class script(Resource):
 api.add_resource(Users, '/api/users/')
 api.add_resource(User, "/api/users/<int:id>")
 api.add_resource(script, "/api/users/<int:id>/script/")
+api.add_resource(UserRegistration, "/api/register")
+api.add_resource(UserLogin, '/api/login')
 
 @app.route('/')
 def home():
