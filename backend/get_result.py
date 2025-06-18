@@ -1,7 +1,7 @@
 import requests
 from google import genai
 from flask import Flask, jsonify
-from api import app
+
 
 
 
