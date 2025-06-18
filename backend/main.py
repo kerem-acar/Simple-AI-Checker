@@ -9,7 +9,7 @@ import get_result
 app = Flask(__name__)
 cors = CORS(app, origins='*')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config["JWT_SECRET_KEY"] = 'your-key-here'
+app.config["JWT_SECRET_KEY"] = 'test'
 db = SQLAlchemy(app)
 api = Api(app)
 jwt = JWTManager(app)
@@ -42,7 +42,7 @@ class UserRegistration(Resource):
         if UserModel.query.filter_by(username=data['username']).first():
             return {"message": "Username taken"}, 400
         
-        new_user = UserModel(username=data['username'], password=data['password'])
+        new_user = UserModel(username=data['username'], password=data['password'], input='', result='')
 
         db.session.add(new_user)
         db.session.commit()
@@ -50,7 +50,6 @@ class UserRegistration(Resource):
         return new_user, 201
 
 class UserLogin(Resource):
-    @marshal_with(userFields)
     def post(self):
         data = request.get_json()
 
@@ -71,18 +70,17 @@ class Users(Resource):
     @marshal_with(userFields)
     def get(self):
         users = UserModel.query.all()
-        return users 
-    @marshal_with(userFields)
+        return users
     @jwt_required()
     def post(self):
         current_user = get_jwt_identity()
         if not current_user:
             return "Must be registered to use this application"
         data = request.get_json()
-        user = UserModel(input=data["input"], result="")
-        db.session.add(user)
+        user = UserModel.query.filter_by(username=current_user).first_or_404()
+        user.input = data["input"]
         db.session.commit()
-        return user, 201
+        return jsonify(logged_in_as=current_user)
 
 class User(Resource):
     @marshal_with(userFields)
