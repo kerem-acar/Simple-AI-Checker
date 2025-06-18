@@ -6,7 +6,7 @@ function Header (){
                 <nav className="menu">
                     <ul className="menu-links">
                         <li><a href="#">Register</a></li>
-                        <li><a href="#"></a>Login</li>
+                        <li><a href="#">Login</a></li>
                     </ul>
                 </nav>
 
