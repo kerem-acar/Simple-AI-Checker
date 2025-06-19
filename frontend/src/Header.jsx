@@ -1,3 +1,6 @@
+import React from "react";
+import {Outlet, Link} from "react-router-dom";
+
 function Header (){
 
     return(
@@ -5,10 +8,16 @@ function Header (){
             <div className="menu-container">
                 <nav className="menu">
                     <ul className="menu-links">
-                        <li><a href="#">Register</a></li>
-                        <li><a href="#">Login</a></li>
+                        <li>
+                            <Link to="/login">Login</Link>
+                        </li>
+                        <li>
+                            <Link to="/register">Register</Link>
+                        </li>
                     </ul>
                 </nav>
+                
+                <Outlet />
 
             </div>
             <div className="header-container">
