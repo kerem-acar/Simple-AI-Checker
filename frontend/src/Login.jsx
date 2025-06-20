@@ -38,23 +38,23 @@ function Login (){
     
     return (
         <div>
-            <h1>Login</h1>
-            <form onSubmit={handleSubmit}>
-                <input value={text} placeholder="Username" onChange={handleChange}></input>
-                <input value={text1} placeholder="Password" onChange={handleChange1}></input>
-                <button type='submit'>Log In</button>
+            <h1 className="font-mono text-[60px] text-violet-600 flex justify-center">Login</h1>
+            <form onSubmit={handleSubmit} className="flex flex-col pt-4 items-center gap-4 pointer-events-auto">
+                <input className="font-serif text-[20px] w-30 rounded-md border-1 border-gray-600 focus:border-pink-600 pl-2" value={text} placeholder="Username" onChange={handleChange}></input>
+                <input className="font-serif text-[20px] w-30 rounded-md border-1 border-gray-600 focus:border-pink-600 pl-2" type="password" value={text1} placeholder="Password" onChange={handleChange1}></input>
+                <button className="cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md w-20 border-none font-mono" type='submit'>Submit</button>
             </form>
-            <div className={showFail === false ? 'loginfail-container' : 'loginfail-container-open'}>
-                <div>
-                    <h2>Try Again!</h2>
-                    <button onClick={handleFail}>Ok</button>
+            <div className={showFail === false ? 'hidden' : 'fixed inset-0 flex justify-center items-center z-1000'}>
+                <div className='border-2 rounded-lg w-80 h-40 bg-red-300 flex justify-center flex-col items-center gap-4'>
+                    <h2 className="font-mono text-[30px] ">Try Again!</h2>
+                    <button class="cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md w-20 border-none font-mono text-white py-1" onClick={handleFail}>Ok</button>
                 </div>
             </div>
-            <div className={showSuccess === false ? 'loginsuccess-container' : 'loginsuccess-container-open'}>
-                <div>
-                    <h2>Success!</h2>
+            <div className={showSuccess === false ? 'hidden' : 'fixed inset-0 flex justify-center items-center z-1000'}>
+                <div className='border-2 rounded-lg w-80 h-40 bg-red-300 flex justify-center flex-col items-center gap-4'>
+                    <h2 className="font-mono text-[30px]">Success!</h2>
                     <button>
-                        <Link to="/">Ok</Link>
+                        <Link to="/" className='cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md w-20 border-none font-mono text-white py-1'>Ok</Link>
                     </button>
                 </div>
             </div>
