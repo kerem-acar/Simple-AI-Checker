@@ -80,7 +80,7 @@ class Users(Resource):
         user = UserModel.query.filter_by(username=current_user).first_or_404()
         user.input = data["input"]
         db.session.commit()
-        return jsonify(logged_in_as=current_user)
+        return jsonify({"logged_in_as": current_user, "id": user.id, "message": "Input received"})
 
 class User(Resource):
     @marshal_with(userFields)
