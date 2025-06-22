@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask import request
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 import get_result
+import bcrypt
 
 app = Flask(__name__)
 cors = CORS(app, origins='*')
@@ -42,7 +43,11 @@ class UserRegistration(Resource):
         if UserModel.query.filter_by(username=data['username']).first():
             return {"message": "Username taken"}, 400
         
-        new_user = UserModel(username=data['username'], password=data['password'], input='', result='')
+        og_password = data['password']
+        salt = bcrypt.gensalt()
+        hashed_pw = bcrypt.hashpw(og_password.encode('utf-8'), salt)
+
+        new_user = UserModel(username=data['username'], password=hashed_pw.decode('utf-8'), input='', result='')
 
         db.session.add(new_user)
         db.session.commit()
@@ -58,12 +63,12 @@ class UserLogin(Resource):
         if not user:
             return {"message": "Username not found"}, 401
         
-        if user.password != data['password']:
+        if bcrypt.checkpw(data['password'].encode('utf-8'), user.password.encode('utf-8')):
+            access_token = create_access_token(identity=user.username)        
+            return jsonify(access_token=access_token)
+        else:
             return {"message": "Incorrect password"}, 401
         
-        access_token = create_access_token(identity=user.username)
-        
-        return jsonify(access_token=access_token)
 
 
 class Users(Resource):
