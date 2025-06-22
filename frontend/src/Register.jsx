@@ -6,6 +6,7 @@ function Register (){
     const [text, setText] = useState("");
     const [text1, setText1] = useState("");
     const [showWelcome, setshowWelcome] = useState(false);
+    const [showCharacter, setshowCharacter] = useState(false);
 
     const handleChange = (e) => {
         setText(e.target.value);
@@ -17,10 +18,18 @@ function Register (){
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        if (text1.length > 72) {
+            setshowCharacter(true);
+            return;
+        }
         const postResponse = await axios.post("http://127.0.0.1:5000/api/register/", { username: text, password: text1 })
         setText("");
         setText1("");
         setshowWelcome(true);
+    }
+
+    const handleClose = () => {
+        setshowCharacter(false);
     }
     
     return (
@@ -37,6 +46,12 @@ function Register (){
                     <button>
                         <Link to="/" className='cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md w-50 border-none font-mono text-white py-0.5 px-6'>Ok</Link>
                     </button>
+                </div>
+            </div>
+            <div className={showCharacter === false ? 'hidden' : 'fixed inset-0 flex justify-center items-center z-1000'}>
+                <div className='border-2 rounded-lg w-80 h-40 bg-red-300 flex justify-center flex-col items-center gap-4'>
+                    <h2 className='font-mono text-[20px] px-10'>Password must be less than 72 characters</h2>
+                    <button onClick={handleClose} className='cursor-pointer bg-blue-500 hover:bg-blue-400 rounded-md w-20 border-none font-mono text-white py-0.5 px-6'>Ok</button>
                 </div>
             </div>
         </div>
